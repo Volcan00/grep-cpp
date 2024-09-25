@@ -6,7 +6,15 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
         return input_line.find(pattern) != std::string::npos;
     }
     else if(pattern == "\\d") {
-            return input_line.find_first_of("01234567890") != std::string::npos;
+        return input_line.find_first_of("01234567890") != std::string::npos;
+    }
+    else if(pattern == "\\w")
+    {
+        for(char c : input_line)
+        {
+            if(!isalnum(c))
+                return false;
+        }
     }
     else {
         throw std::runtime_error("Unhandled pattern " + pattern);
