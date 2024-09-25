@@ -32,10 +32,10 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
 
         for(char c : char_group) {
             if(input_line.find(c) != std::string::npos)
-                return false;
+                return true;
         }
 
-        return true;
+        return false;
     }
     else {
         throw std::runtime_error("Unhandled pattern " + pattern);
