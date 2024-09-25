@@ -17,7 +17,7 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
 
         return true;
     }
-    else if(pattern.at(0) =='[' && pattern.at(pattern.length() - 1) == ']') {
+    else if(pattern.front() =='[' && pattern.back() == ']') {
         std::string char_group = pattern.substr(1, pattern.length() - 2);
 
         for(char c : char_group) {
