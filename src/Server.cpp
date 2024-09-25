@@ -18,24 +18,28 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
         return true;
     }
     else if(pattern.front() =='[' && pattern.back() == ']') {
-        std::string char_group = pattern.substr(1, pattern.length() - 2);
+        bool is_negative_group = (pattern[1] == '^');
 
-        for(char c : char_group) {
-            if(input_line.find(c) != std::string::npos)
-                return true;
+        std::string char_group = is_negative_group
+                                    ? pattern.substr(2, pattern.length() - 3)
+                                    : pattern.substr(1 - pattern.length() - 2);
+
+        if(is_negative_group) {
+            for(char c : char_group) {
+                if(input_line.find(c) != std::string::npos)
+                    return false;
+            }
+
+            return true;
         }
+        else {
+            for(char c : char_group) {
+                if(input_line.find(c) != std::string::npos)
+                    return true;
+            }
 
-        return false;
-    }
-    else if(pattern.substr(0, 1) == "[^" && pattern.back() == ']') {
-        std::string char_group = pattern.substr(2, pattern.length() - 2);
-
-        for(char c : char_group) {
-            if(input_line.find(c) != std::string::npos)
-                return false;
+            return false;
         }
-
-        return true;
     }
     else {
         throw std::runtime_error("Unhandled pattern " + pattern);
