@@ -15,6 +15,8 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
             if(!isalnum(c))
                 return false;
         }
+
+        return true;
     }
     else {
         throw std::runtime_error("Unhandled pattern " + pattern);
