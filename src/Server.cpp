@@ -21,7 +21,7 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
         bool is_negative_group = (pattern[1] == '^');
 
         std::string char_group = is_negative_group
-                                    ? pattern.substr(2, pattern.length() - 2)
+                                    ? pattern.substr(2, pattern.length() - 3)
                                     : pattern.substr(1 - pattern.length() - 2);
 
         if(is_negative_group) {
