@@ -8,8 +8,7 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
     else if(pattern == "\\d") {
         return input_line.find_first_of("01234567890") != std::string::npos;
     }
-    else if(pattern == "\\w")
-    {
+    else if(pattern == "\\w") {
         for(char c : input_line)
         {
             if(!isalnum(c))
@@ -17,6 +16,16 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
         }
 
         return true;
+    }
+    else if(!pattern.at(0) =='[' && pattern.at(pattern.length() - 1) == ']') {
+        std::string char_group = pattern.substr(1, pattern.length() - 2);
+
+        for(char c : char_group) {
+            if(input_line.find(c) != std::string::npos)
+                return true;
+        }
+
+        return false;
     }
     else {
         throw std::runtime_error("Unhandled pattern " + pattern);
