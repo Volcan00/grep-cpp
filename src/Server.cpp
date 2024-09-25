@@ -27,6 +27,16 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
 
         return false;
     }
+    else if(pattern.front() == '[' && pattern.back() == ']') {
+        std::string char_group = pattern.substr(1, pattern.length() - 2);
+
+        for(char c : char_group) {
+            if(input_line.find(c) == std::string::npos)
+                return true;
+        }
+
+        return false;
+    }
     else {
         throw std::runtime_error("Unhandled pattern " + pattern);
     }
