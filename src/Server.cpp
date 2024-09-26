@@ -42,49 +42,43 @@ bool match_negative_group(const std::string& input_string, const std::string& pa
 }
 
 bool match_combined_character_class(const std::string& input_line, const std::string& pattern) {
-    int pattern_index = 0;
-    int input_index = 0;
-
-    while (pattern_index < pattern.size()) {
-        char pattern_char = pattern[pattern_index];
-        char input_line_char = input_index < input_line.size() ? input_line[input_index] : '\0';  // Handle potential end of input_line
-
-        if (pattern_char == input_line_char) {
-            pattern_index++;
-            input_index++;
-        } else if (pattern_char == '\\') {
-            // Handle escape sequences
-            pattern_index++;
-            pattern_char = pattern[pattern_index];
-            if (pattern_char == 'd') {
-                // Match a digit
-                if (!std::isdigit(input_line_char)) {
-                    return false;
-                }
-            } else if (pattern_char == 'w') {
-                // Match a word character
-                if (!std::isalnum(input_line_char)) {
-                    return false;
-                }
-            } else if (pattern_char == 's') {
-                // Match a whitespace character
-                if (!std::isspace(input_line_char)) {
-                    return false;
-                }
+    int inputLen = input_line.size();
+    int patLen = pattern.size();
+    
+    int i = 0, j = 0;
+    
+    // Traverse both the input_line and the pattern
+    while (i < inputLen && j < patLen) {
+        if (pattern[j] == '\\') {
+            // Check the next character after the backslash
+            if (j + 1 >= patLen) return false; // Invalid pattern
+            char nextChar = pattern[j + 1];
+            
+            if (nextChar == 'd') {
+                // \d matches any digit
+                if (!std::isdigit(input_line[i])) return false;
+            } else if (nextChar == 'w') {
+                // \w matches any word character (alphanumeric or _)
+                if (!std::isalnum(input_line[i])) return false;
             } else {
-                // Invalid escape sequence
+                // Invalid escape sequence, return false
                 return false;
             }
-            pattern_index++;
-            input_index++;
+            
+            // Move to the next character in the pattern
+            j += 2;
         } else {
-            // Mismatch or end of pattern but not end of input_line
-            return pattern_index == pattern.size() && input_index == input_line.size();
+            // Literal character match
+            if (pattern[j] != input_line[i]) {
+                return false;
+            }
+            j++;
         }
+        i++;
     }
-
-    // If the pattern is exhausted and the input_line is also exhausted, it's a match
-    return input_index == input_line.size();
+    
+    // If the pattern is fully consumed and the input_line is fully matched, it's a success
+    return j == patLen && i == inputLen;
 }
 
 bool match_pattern(const std::string& input_line, const std::string& pattern) {
