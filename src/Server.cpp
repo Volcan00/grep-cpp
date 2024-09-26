@@ -18,19 +18,34 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
     //     return true;
     // }
     if(!pattern.empty()) {
-        for(char c : pattern) {
-            if(c == '\\d') {
-                return input_line.find_first_of("1234567890") == std::string::npos;
+        size_t pattern_pos = 0;
+        size_t input_pos =0;
+
+        while(pattern_pos < pattern.size() && input_pos < input_line.size()) {
+            if(pattern[pattern_pos] == '\\') {
+                if(pattern_pos + 1 < pattern.size()) {
+                    char special_character = pattern[pattern_pos + 1];
+
+                    if(special_character == 'd') {
+                        if(!isdigit(input_line[input_pos]))
+                            return false;
+                    }
+
+                    ++input_pos;
+                    pattern_pos += 2;
+
+                }
             }
-            else if(c == '\\w') {
-                return (!isalnum(c));
-            }
-            else if(isalpha(c)){
-                return input_line.find(c) == std::string::npos;
+            else {
+                if(pattern[pattern_pos != input_line[input_pos]])
+                    return false;
+
+                ++input_pos;
+                ++pattern_pos;
             }
         }
 
-        return true;
+        return (pattern_pos == pattern.size());
     }
     else if(pattern.front() =='[' && pattern.back() == ']') {
         bool is_negative_group = (pattern[1] == '^');
