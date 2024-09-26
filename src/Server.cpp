@@ -5,35 +5,19 @@ bool matchChar(char pattern, char input) {
     switch (pattern) {
         case 'd': return isdigit(input); // matches \d
         case 'w': return isalnum(input);  // matches \w (alphanumeric)
-        case ' ': return isspace(input);  // matches whitespace
         default: return pattern == input; // matches literal characters
     }
 }
 
 bool match_pattern(const std::string& input_line, const std::string& pattern) {
-    // if (pattern.length() == 1) {
-    //     return input_line.find(pattern) != std::string::npos;
-    // }
-    // else if(pattern == "\\d") {
-    //     return input_line.find_first_of("01234567890") != std::string::npos;
-    // }
-    // else if(pattern == "\\w") {
-    //     for(char c : input_line)
-    //     {
-    //         if(!isalnum(c))
-    //             return false;
-    //     }
-
-    //     return true;
-    // }
     if(!pattern.empty()) {
         size_t inputIndex = 0; // Index for the input string
         size_t patternIndex = 0; // Index for the pattern string
 
         while (inputIndex < input_line.size() && patternIndex < pattern.size()) {
-            // Handle the case for escaped sequences like \d, \w, \s
+            // Handle escaped characters (like \d, \w)
             if (pattern[patternIndex] == '\\') {
-                patternIndex++; // Move to the next character (d, w, s)
+                patternIndex++; // Move to the next character (d, w)
                 if (patternIndex >= pattern.size()) return false; // Invalid pattern
                 char currentPattern = pattern[patternIndex];
                 if (!matchChar(currentPattern, input_line[inputIndex])) {
@@ -51,8 +35,8 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
             }
         }
 
-        // Ensure we've consumed all characters in the pattern and there are no extra unmatched characters in input
-        return patternIndex == pattern.size() && (inputIndex == input_line.size() || input_line.substr(inputIndex).find_first_not_of(' ') == std::string::npos);
+    // Ensure we've consumed all characters in the pattern
+    return patternIndex == pattern.size() && inputIndex == input_line.size();
     }
     else if(pattern.front() =='[' && pattern.back() == ']') {
         bool is_negative_group = (pattern[1] == '^');
