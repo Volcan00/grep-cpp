@@ -41,35 +41,24 @@ bool match_negative_group(const std::string& input_string, const std::string& pa
     return true;
 }
 
-bool match_combined_character_class(const std::string& input_line, const std::string& pattern) {
+bool match_with_starting_position(const std::string& input_line, const std::string& pattern, int input_pos, int pattern_pos) {
     int input_len = input_line.size();
     int pat_len = pattern.size();
     
-    int input_pos = 0;
-    int pattern_pos = 0;
-    
-    // Traverse both the input_line and the pattern
     while (input_pos < input_len && pattern_pos < pat_len) {
         if (pattern[pattern_pos] == '\\') {
-            // Check the next character after the backslash
             if (pattern_pos + 1 >= pat_len) return false; // Invalid pattern
             char nextChar = pattern[pattern_pos + 1];
-            
             if (nextChar == 'd') {
-                // \d matches any digit
                 if (!std::isdigit(input_line[input_pos])) return false;
             } else if (nextChar == 'w') {
-                // \w matches any word character (alphanumeric or _)
                 if (!std::isalnum(input_line[input_pos])) return false;
             } else {
-                // Invalid escape sequence, return false
-                return false;
+                return false; // Unsupported escape sequence
             }
-            
-            // Move to the next character in the pattern
-            pattern_pos += 2;
+            pattern_pos += 2;  // Move past \d or \w
         } else {
-            // Literal character match
+            // Literal match
             if (pattern[pattern_pos] != input_line[input_pos]) {
                 return false;
             }
@@ -78,8 +67,20 @@ bool match_combined_character_class(const std::string& input_line, const std::st
         input_pos++;
     }
     
-    // If the pattern is fully consumed and the input_line is fully matched, it's a success
-    return pattern_pos == pat_len && input_pos == input_len;
+    // If we consumed the entire pattern, we have a match
+    return pattern_pos == input_len;
+}
+
+bool match_combined_character_class(const std::string& input_line, const std::string& pattern) {
+    int input_len = input_line.size();
+    
+    for (int i = 0; i < input_len; ++i) {
+        if (match_with_starting_position(input_line, pattern, i, 0)) {
+            return true;
+        }
+    }
+    
+    return false;
 }
 
 bool match_pattern(const std::string& input_line, const std::string& pattern) {
