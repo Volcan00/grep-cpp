@@ -25,7 +25,7 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
             else if(c == '\\w') {
                 return !isalnum(c);
             }
-            else {
+            else if(isalpha(c)){
                 return input_line.find(c) == std::string::npos;
             }
         }
