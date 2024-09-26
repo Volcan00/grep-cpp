@@ -83,7 +83,7 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
                 }
 
                 ++input_pos;
-                ++input_line;
+                ++patter_pos;
             }
         }
 
