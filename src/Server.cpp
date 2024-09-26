@@ -3,41 +3,52 @@
 
 bool matchChar(char pattern, char input) {
     switch (pattern) {
-        case 'd': return isdigit(input); // matches \d
-        case 'w': return isalnum(input);  // matches \w (alphanumeric)
-        default: return pattern == input; // matches literal characters
+        case 'd': return isdigit(input);
+        case 'w': return isalnum(input);
+        default: return pattern == input;
     }
 }
 
 bool match_pattern(const std::string& input_line, const std::string& pattern) {
     if(!pattern.empty()) {
-        size_t inputIndex = 0; // Index for the input string
-        size_t patternIndex = 0; // Index for the pattern string
+        size_t input_pos = 0;
 
-        while (patternIndex < pattern.size()) {
-            if (pattern[patternIndex] == '\\') {
-                // If the pattern has an escape character
-                patternIndex++; // Move to the next character (d, w)
-                if (patternIndex >= pattern.size()) return false; // Invalid pattern
-                char currentPattern = pattern[patternIndex];
-                // Ensure there are still characters in the input to match against
-                if (inputIndex >= input_line.size() || !matchChar(currentPattern, input_line[inputIndex])) {
-                    return false; // If it doesn't match, return false
+        while(input_pos < input_line.size()) {
+            size_t pattern_pos = 0;
+            size_t temp = input_pos;
+
+            while(pattern_pos < pattern.size() && temp < input_line.size()) {
+                if(pattern[pattern_pos] == '\\') {
+                    ++pattern_pos;
+
+                    if(pattern_pos < pattern.size()) {
+                        if(!matchChar(pattern[pattern_pos], input_line[input_pos])) {
+                            break;
+                        }
+
+                        ++temp;
+                    }
+                    else {
+                        break;
+                    }
                 }
-                inputIndex++; // Move to the next character in input
-                patternIndex++; // Move to the next character in pattern
-            } else {
-                // Match a literal character (including spaces)
-                if (inputIndex >= input_line.size() || !matchChar(pattern[patternIndex], input_line[inputIndex])) {
-                    return false; // If it doesn't match, return false
+                else {
+                    if(!matchChar(pattern[pattern_pos], input_line[input_pos])) {
+                        break;
+                    }
+                    else {
+                        ++temp;
+                    }
                 }
-                inputIndex++; // Move to the next character in input
-                patternIndex++; // Move to the next character in pattern
+
+                ++pattern_pos;
             }
-        }
 
-    // Ensure we've consumed all characters in the pattern and input
-        return inputIndex == input_line.size();
+            if(pattern_pos == pattern.size()) return true;
+            ++input_pos;
+        }
+        
+        return false;
     }
     else if(pattern.front() =='[' && pattern.back() == ']') {
         bool is_negative_group = (pattern[1] == '^');
