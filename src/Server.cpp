@@ -2,17 +2,32 @@
 #include <string>
 
 bool match_pattern(const std::string& input_line, const std::string& pattern) {
-    if (pattern.length() == 1) {
-        return input_line.find(pattern) != std::string::npos;
-    }
-    else if(pattern == "\\d") {
-        return input_line.find_first_of("01234567890") != std::string::npos;
-    }
-    else if(pattern == "\\w") {
-        for(char c : input_line)
-        {
-            if(!isalnum(c))
-                return false;
+    // if (pattern.length() == 1) {
+    //     return input_line.find(pattern) != std::string::npos;
+    // }
+    // else if(pattern == "\\d") {
+    //     return input_line.find_first_of("01234567890") != std::string::npos;
+    // }
+    // else if(pattern == "\\w") {
+    //     for(char c : input_line)
+    //     {
+    //         if(!isalnum(c))
+    //             return false;
+    //     }
+
+    //     return true;
+    // }
+    if(!pattern.empty()) {
+        for(char c : pattern) {
+            if(c == '\\d') {
+                return input_line.find_first_of("1234567890") == std::string::npos;
+            }
+            else if(c == '\\w') {
+                return !isalnum(c);
+            }
+            else {
+                return input_line.find(c) == std::string::npos;
+            }
         }
 
         return true;
