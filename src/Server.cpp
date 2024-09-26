@@ -14,20 +14,21 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
         size_t inputIndex = 0; // Index for the input string
         size_t patternIndex = 0; // Index for the pattern string
 
-        while (inputIndex < input_line.size() && patternIndex < pattern.size()) {
-            // Handle escaped characters (like \d, \w)
+        while (patternIndex < pattern.size()) {
             if (pattern[patternIndex] == '\\') {
+                // If the pattern has an escape character
                 patternIndex++; // Move to the next character (d, w)
                 if (patternIndex >= pattern.size()) return false; // Invalid pattern
                 char currentPattern = pattern[patternIndex];
-                if (!matchChar(currentPattern, input_line[inputIndex])) {
+                // Ensure there are still characters in the input to match against
+                if (inputIndex >= input_line.size() || !matchChar(currentPattern, input_line[inputIndex])) {
                     return false; // If it doesn't match, return false
                 }
                 inputIndex++; // Move to the next character in input
                 patternIndex++; // Move to the next character in pattern
             } else {
-                // Match single character
-                if (!matchChar(pattern[patternIndex], input_line[inputIndex])) {
+                // Match a literal character (including spaces)
+                if (inputIndex >= input_line.size() || !matchChar(pattern[patternIndex], input_line[inputIndex])) {
                     return false; // If it doesn't match, return false
                 }
                 inputIndex++; // Move to the next character in input
@@ -35,8 +36,8 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
             }
         }
 
-    // Ensure we've consumed all characters in the pattern
-    return patternIndex == pattern.size() && inputIndex == input_line.size();
+    // Ensure we've consumed all characters in the pattern and input
+        return inputIndex == input_line.size();
     }
     else if(pattern.front() =='[' && pattern.back() == ']') {
         bool is_negative_group = (pattern[1] == '^');
