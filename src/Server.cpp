@@ -48,13 +48,13 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
     //     return (pattern_pos == pattern.size());
     // }
     if(!pattern.empty()) {
-        size_t patter_pos = 0;
+        size_t pattern_pos = 0;
         size_t input_pos = 0;
 
-        while(patter_pos < pattern.length() && input_pos < input_line.length()) {
-            if(pattern[patter_pos] == '\\') {
-                if(patter_pos + 1 < pattern.length()) {
-                    char special_character = pattern[patter_pos + 1];
+        while(pattern_pos < pattern.length() && input_pos < input_line.length()) {
+            if(pattern[pattern_pos] == '\\') {
+                if(pattern_pos + 1 < pattern.length()) {
+                    char special_character = pattern[pattern_pos + 1];
 
                     if(special_character == 'd') {
                         while(input_pos < input_line.length() && !isdigit(input_line[input_pos])) {
@@ -74,16 +74,16 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
                         ++input_pos;
                     }
 
-                    patter_pos += 2;
+                    pattern_pos += 2;
                 }
             }
-            else if(isalpha(pattern[patter_pos])) {
-                if(pattern[patter_pos] != input_line[input_pos]) {
+            else if(isalpha(pattern[pattern_pos])) {
+                if(pattern[pattern_pos] != input_line[input_pos]) {
                     return false;
                 }
 
                 ++input_pos;
-                ++patter_pos;
+                ++pattern_pos;
             }
         }
 
