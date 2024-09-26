@@ -52,8 +52,8 @@ bool match_combined_character_class(const std::string& input_line, const std::st
     while (input_pos < input_len && pattern_pos < pat_len) {
         if (pattern[pattern_pos] == '\\') {
             // Check the next character after the backslash
-            if (j + 1 >= pat_len) return false; // Invalid pattern
-            char nextChar = pattern[j + 1];
+            if (pattern_pos + 1 >= pat_len) return false; // Invalid pattern
+            char nextChar = pattern[pattern_pos + 1];
             
             if (nextChar == 'd') {
                 // \d matches any digit
@@ -67,10 +67,10 @@ bool match_combined_character_class(const std::string& input_line, const std::st
             }
             
             // Move to the next character in the pattern
-            j += 2;
+            pattern_pos += 2;
         } else {
             // Literal character match
-            if (pattern[j] != input_line[input_pos]) {
+            if (pattern[pattern_pos] != input_line[input_pos]) {
                 return false;
             }
             pattern_pos++;
