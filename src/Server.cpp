@@ -64,12 +64,16 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
                         if(input_pos >= input_line.length()) {
                             return false;
                         }
+
+                        ++input_pos;
                     }
                     else if(special_character == 'w') {
-                        return !isalnum(input_line[input_pos]);
+                        if(!isalnum(input_line[input_pos])) {
+                            return false;
+                        }
+                        ++input_pos;
                     }
 
-                    ++input_pos;
                     patter_pos += 2;
                 }
             }
@@ -77,6 +81,9 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
                 if(pattern[patter_pos] != input_line[input_pos]) {
                     return false;
                 }
+
+                ++input_pos;
+                ++input_line;
             }
         }
 
