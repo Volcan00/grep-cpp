@@ -17,36 +17,46 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
 
     //     return true;
     // }
-    // if(!pattern.empty()) {
-    //     size_t pattern_pos = 0;
-    //     size_t input_pos = 0;
+    size_t pattern_pos = 0;
+    size_t input_pos = 0;
 
-    //     while(pattern_pos < pattern.size() && input_pos < input_line.size()) {
-    //         if(pattern[pattern_pos] == '\\') {
-    //             if(pattern_pos + 1 < pattern.size()) {
-    //                 char special_character = pattern[pattern_pos + 1];
+    while (pattern_pos < pattern.length() && input_pos < input_line.length()) {
+        char pattern_char = pattern[pattern_pos];
+        char input_char = input_line[input_pos];
 
-    //                 if(special_character == 'd') {
-    //                     if(!isdigit(input_line[input_pos]))
-    //                         return false;
-    //                 }
+        if (pattern_char == '\\') {
+            if (pattern_pos + 1 < pattern.length()) {
+                pattern_pos++;
+                pattern_char = pattern[pattern_pos];
 
-    //                 ++input_pos;
-    //                 pattern_pos += 2;
+                switch (pattern_char) {
+                    case 'd':
+                        if (!isdigit(input_char)) {
+                            return false;
+                        }
+                        break;
+                    case 'w':
+                        if (!isalnum(input_char)) {
+                            return false;
+                        }
+                        break;
+                    default:
+                        // Handle other escape sequences as needed
+                        break;
+                }
+            } else {
+                // Handle invalid escape sequence
+                return false;
+            }
+        } else if (pattern_char != input_char) {
+            return false;
+        }
 
-    //             }
-    //         }
-    //         else {
-    //             if(pattern[pattern_pos != input_line[input_pos]])
-    //                 return false;
+        pattern_pos++;
+        input_pos++;
+    }
 
-    //             ++input_pos;
-    //             ++pattern_pos;
-    //         }
-    //     }
-
-    //     return (pattern_pos == pattern.size());
-    // }
+    return pattern_pos == pattern.length();
     if(!pattern.empty()) {
         size_t pattern_pos = 0;
         size_t input_pos = 0;
