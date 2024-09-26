@@ -45,44 +45,46 @@ bool match_combined_character_class(const std::string& input_line, const std::st
     int pattern_index = 0;
     int input_index = 0;
 
-    while (pattern_index < pattern.size() && input_index < input_line.size()) {
+    while (pattern_index < pattern.size()) {
         char pattern_char = pattern[pattern_index];
-        char text_char = input_line[input_index];
+        char input_line_char = input_index < input_line.size() ? input_line[input_index] : '\0';  // Handle potential end of input_line
 
-        if (pattern_char == text_char) {
-            ++pattern_index;
-            ++input_index;
-        } 
-        else if (pattern_char == '\\') {
+        if (pattern_char == input_line_char) {
+            pattern_index++;
+            input_index++;
+        } else if (pattern_char == '\\') {
             // Handle escape sequences
             pattern_index++;
             pattern_char = pattern[pattern_index];
             if (pattern_char == 'd') {
                 // Match a digit
-                if (!std::isdigit(text_char)) {
+                if (!std::isdigit(input_line_char)) {
                     return false;
                 }
-            } 
-            else if (pattern_char == 'w') {
+            } else if (pattern_char == 'w') {
                 // Match a word character
-                if (!std::isalnum(text_char)) {
+                if (!std::isalnum(input_line_char)) {
                     return false;
                 }
-            } 
-            else {
+            } else if (pattern_char == 's') {
+                // Match a whitespace character
+                if (!std::isspace(input_line_char)) {
+                    return false;
+                }
+            } else {
                 // Invalid escape sequence
                 return false;
             }
-            ++pattern_index;
-            ++input_index;
+            pattern_index++;
+            input_index++;
         } else {
-            // Mismatch
-            return false;
+            // Mismatch or end of pattern but not end of input_line
+            return pattern_index == pattern.size() && input_index == input_line.size();
         }
     }
 
-    // If the pattern is exhausted before the text, it's a match
-    return pattern_index == pattern.size();
+    // If the pattern is exhausted and the input_line is also exhausted, it's a match
+    return input_index == input_line.size();
 }
 
 bool match_pattern(const std::string& input_line, const std::string& pattern) {
