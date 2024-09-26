@@ -5,7 +5,7 @@ bool matchChar(char pattern, char input) {
     switch (pattern) {
         case 'd': return isdigit(input); // matches \d
         case 'w': return isalnum(input);  // matches \w (alphanumeric)
-        case 's': return isspace(input);  // matches whitespace
+        case ' ': return isspace(input);  // matches whitespace
         default: return pattern == input; // matches literal characters
     }
 }
