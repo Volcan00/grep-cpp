@@ -31,31 +31,28 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
         size_t patternIndex = 0; // Index for the pattern string
 
         while (inputIndex < input_line.size() && patternIndex < pattern.size()) {
-        // If the current pattern character is followed by a number, it indicates repetition
-        if (patternIndex + 1 < pattern.size() && isdigit(pattern[patternIndex + 1])) {
-            int repeatCount = pattern[patternIndex + 1] - '0'; // Get the repeat count
-            while (repeatCount > 0) {
-                // Match character class
+            // Handle the case for escaped sequences like \d, \w, \s
+            if (pattern[patternIndex] == '\\') {
+                patternIndex++; // Move to the next character (d, w, s)
+                if (patternIndex >= pattern.size()) return false; // Invalid pattern
+                char currentPattern = pattern[patternIndex];
+                if (!matchChar(currentPattern, input_line[inputIndex])) {
+                    return false; // If it doesn't match, return false
+                }
+                inputIndex++; // Move to the next character in input
+                patternIndex++; // Move to the next character in pattern
+            } else {
+                // Match single character
                 if (!matchChar(pattern[patternIndex], input_line[inputIndex])) {
                     return false; // If it doesn't match, return false
                 }
                 inputIndex++; // Move to the next character in input
-                repeatCount--; // Decrement repeat count
-                if (inputIndex >= input_line.size()) break; // Avoid out of bounds
+                patternIndex++; // Move to the next character in pattern
             }
-            patternIndex += 2; // Move past the character and its count
-        } else {
-            // Match single character
-            if (!matchChar(pattern[patternIndex], input_line[inputIndex])) {
-                return false; // If it doesn't match, return false
-            }
-            inputIndex++; // Move to the next character in input
-            patternIndex++; // Move to the next character in pattern
         }
-    }
 
-    // Ensure we've consumed all characters in the pattern
-    return patternIndex == pattern.size() && inputIndex == input_line.size();
+        // Ensure we've consumed all characters in the pattern and there are no extra unmatched characters in input
+        return patternIndex == pattern.size() && (inputIndex == input_line.size() || input_line.substr(inputIndex).find_first_not_of(' ') == std::string::npos);
     }
     else if(pattern.front() =='[' && pattern.back() == ']') {
         bool is_negative_group = (pattern[1] == '^');
