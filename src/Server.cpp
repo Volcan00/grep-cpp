@@ -87,7 +87,7 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
             }
         }
 
-        return true;
+        return pattern_pos == pattern.length();;
     }
     else if(pattern.front() =='[' && pattern.back() == ']') {
         bool is_negative_group = (pattern[1] == '^');
