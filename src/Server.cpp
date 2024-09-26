@@ -42,54 +42,47 @@ bool match_negative_group(const std::string& input_string, const std::string& pa
 }
 
 bool match_combined_character_class(const std::string& input_line, const std::string& pattern) {
-    size_t input_pos = 0;
+    int pattern_index = 0;
+    int input_index = 0;
 
-    while(input_pos < input_line.size()) {
-        size_t pattern_pos = 0;
-        size_t input_pos_cpy = input_pos;
+    while (pattern_index < pattern.size() && input_index < input_line.size()) {
+        char pattern_char = pattern[pattern_index];
+        char text_char = input_line[input_index];
 
-        while(input_pos_cpy < input_line.size() && pattern_pos < pattern.size()) {
-            if(pattern[pattern_pos] == '\\') {
-                ++pattern_pos;
-
-                if(pattern_pos < pattern.size()) {
-                    if(pattern[pattern_pos] == 'd') {
-                        if(!isdigit(input_line[input_pos_cpy])) {
-                            break;
-                        }
-                    }
-                    else {
-                        ++input_pos_cpy;
-                    }
+        if (pattern_char == text_char) {
+            ++pattern_index;
+            ++input_index;
+        } 
+        else if (pattern_char == '\\') {
+            // Handle escape sequences
+            pattern_index++;
+            pattern_char = pattern[pattern_index];
+            if (pattern_char == 'd') {
+                // Match a digit
+                if (!std::isdigit(text_char)) {
+                    return false;
                 }
-                else if(pattern[pattern_pos] == 'w') {
-                    if(!isalnum(input_line[input_pos_cpy])) {
-                        break;
-                    }
-                    else {
-                        ++input_pos_cpy;
-                    }
+            } 
+            else if (pattern_char == 'w') {
+                // Match a word character
+                if (!std::isalnum(text_char)) {
+                    return false;
                 }
-                else
-                    break;
-            }
+            } 
             else {
-                if(input_line[input_pos_cpy] != pattern[pattern_pos]) {
-                    break;
-                }
-                else {
-                    ++input_pos_cpy;
-                }
+                // Invalid escape sequence
+                return false;
             }
-            ++pattern_pos;
+            ++pattern_index;
+            ++input_index;
+        } else {
+            // Mismatch
+            return false;
         }
-        if(pattern_pos == pattern.size()) {
-            return true;
-        }
-        ++input_pos;
     }
 
-    return false;
+    // If the pattern is exhausted before the text, it's a match
+    return pattern_index == pattern.size();
 }
 
 bool match_pattern(const std::string& input_line, const std::string& pattern) {
