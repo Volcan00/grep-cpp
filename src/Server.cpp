@@ -23,7 +23,7 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
                 return input_line.find_first_of("1234567890") == std::string::npos;
             }
             else if(c == '\\w') {
-                return !isalnum(c);
+                return (!isalnum(c));
             }
             else if(isalpha(c)){
                 return input_line.find(c) == std::string::npos;
