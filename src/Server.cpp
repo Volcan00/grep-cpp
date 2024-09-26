@@ -30,23 +30,23 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
         size_t inputIndex = 0; // Index for the input string
         size_t patternIndex = 0; // Index for the pattern string
 
-        while (inputIndex < input.size() && patternIndex < pattern.size()) {
+        while (inputIndex < input_line.size() && patternIndex < pattern.size()) {
         // If the current pattern character is followed by a number, it indicates repetition
         if (patternIndex + 1 < pattern.size() && isdigit(pattern[patternIndex + 1])) {
             int repeatCount = pattern[patternIndex + 1] - '0'; // Get the repeat count
             while (repeatCount > 0) {
                 // Match character class
-                if (!matchChar(pattern[patternIndex], input[inputIndex])) {
+                if (!matchChar(pattern[patternIndex], input_line[inputIndex])) {
                     return false; // If it doesn't match, return false
                 }
                 inputIndex++; // Move to the next character in input
                 repeatCount--; // Decrement repeat count
-                if (inputIndex >= input.size()) break; // Avoid out of bounds
+                if (inputIndex >= input_line.size()) break; // Avoid out of bounds
             }
             patternIndex += 2; // Move past the character and its count
         } else {
             // Match single character
-            if (!matchChar(pattern[patternIndex], input[inputIndex])) {
+            if (!matchChar(pattern[patternIndex], input_line[inputIndex])) {
                 return false; // If it doesn't match, return false
             }
             inputIndex++; // Move to the next character in input
@@ -55,7 +55,7 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
     }
 
     // Ensure we've consumed all characters in the pattern
-    return patternIndex == pattern.size() && inputIndex == input.size();
+    return patternIndex == pattern.size() && inputIndex == input_line.size();
     }
     else if(pattern.front() =='[' && pattern.back() == ']') {
         bool is_negative_group = (pattern[1] == '^');
