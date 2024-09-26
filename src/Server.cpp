@@ -50,7 +50,7 @@ bool match_combined_character_class(const std::string& input_line, const std::st
     
     // Traverse both the input_line and the pattern
     while (input_pos < input_len && pattern_pos < pat_len) {
-        if (pattern[j] == '\\') {
+        if (pattern[pattern_pos] == '\\') {
             // Check the next character after the backslash
             if (j + 1 >= pat_len) return false; // Invalid pattern
             char nextChar = pattern[j + 1];
