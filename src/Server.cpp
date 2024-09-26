@@ -42,24 +42,25 @@ bool match_negative_group(const std::string& input_string, const std::string& pa
 }
 
 bool match_combined_character_class(const std::string& input_line, const std::string& pattern) {
-    int inputLen = input_line.size();
-    int patLen = pattern.size();
+    int input_len = input_line.size();
+    int pat_len = pattern.size();
     
-    int i = 0, j = 0;
+    int input_pos = 0;
+    int pattern_pos = 0;
     
     // Traverse both the input_line and the pattern
-    while (i < inputLen && j < patLen) {
+    while (input_pos < input_len && pattern_pos < pat_len) {
         if (pattern[j] == '\\') {
             // Check the next character after the backslash
-            if (j + 1 >= patLen) return false; // Invalid pattern
+            if (j + 1 >= pat_len) return false; // Invalid pattern
             char nextChar = pattern[j + 1];
             
             if (nextChar == 'd') {
                 // \d matches any digit
-                if (!std::isdigit(input_line[i])) return false;
+                if (!std::isdigit(input_line[input_pos])) return false;
             } else if (nextChar == 'w') {
                 // \w matches any word character (alphanumeric or _)
-                if (!std::isalnum(input_line[i])) return false;
+                if (!std::isalnum(input_line[input_pos])) return false;
             } else {
                 // Invalid escape sequence, return false
                 return false;
@@ -69,16 +70,16 @@ bool match_combined_character_class(const std::string& input_line, const std::st
             j += 2;
         } else {
             // Literal character match
-            if (pattern[j] != input_line[i]) {
+            if (pattern[j] != input_line[input_pos]) {
                 return false;
             }
-            j++;
+            pattern_pos++;
         }
-        i++;
+        input_pos++;
     }
     
     // If the pattern is fully consumed and the input_line is fully matched, it's a success
-    return j == patLen && i == inputLen;
+    return pattern_pos == pat_len && input_pos == input_len;
 }
 
 bool match_pattern(const std::string& input_line, const std::string& pattern) {
