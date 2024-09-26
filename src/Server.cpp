@@ -1,6 +1,15 @@
 #include <iostream>
 #include <string>
 
+bool matchChar(char pattern, char input) {
+    switch (pattern) {
+        case 'd': return isdigit(input); // matches \d
+        case 'w': return isalnum(input);  // matches \w (alphanumeric)
+        case 's': return isspace(input);  // matches whitespace
+        default: return pattern == input; // matches literal characters
+    }
+}
+
 bool match_pattern(const std::string& input_line, const std::string& pattern) {
     // if (pattern.length() == 1) {
     //     return input_line.find(pattern) != std::string::npos;
@@ -17,87 +26,36 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
 
     //     return true;
     // }
-    size_t pattern_pos = 0;
-    size_t input_pos = 0;
+    if(!pattern.empty()) {
+        size_t inputIndex = 0; // Index for the input string
+        size_t patternIndex = 0; // Index for the pattern string
 
-    while (pattern_pos < pattern.length() && input_pos < input_line.length()) {
-        char pattern_char = pattern[pattern_pos];
-        char input_char = input_line[input_pos];
-
-        if (pattern_char == '\\') {
-            if (pattern_pos + 1 < pattern.length()) {
-                pattern_pos++;
-                pattern_char = pattern[pattern_pos];
-
-                switch (pattern_char) {
-                    case 'd':
-                        if (!isdigit(input_char)) {
-                            return false;
-                        }
-                        break;
-                    case 'w':
-                        if (!isalnum(input_char)) {
-                            return false;
-                        }
-                        break;
-                    default:
-                        // Handle other escape sequences as needed
-                        break;
+        while (inputIndex < input.size() && patternIndex < pattern.size()) {
+        // If the current pattern character is followed by a number, it indicates repetition
+        if (patternIndex + 1 < pattern.size() && isdigit(pattern[patternIndex + 1])) {
+            int repeatCount = pattern[patternIndex + 1] - '0'; // Get the repeat count
+            while (repeatCount > 0) {
+                // Match character class
+                if (!matchChar(pattern[patternIndex], input[inputIndex])) {
+                    return false; // If it doesn't match, return false
                 }
-            } else {
-                // Handle invalid escape sequence
-                return false;
+                inputIndex++; // Move to the next character in input
+                repeatCount--; // Decrement repeat count
+                if (inputIndex >= input.size()) break; // Avoid out of bounds
             }
-        } else if (pattern_char != input_char) {
-            return false;
+            patternIndex += 2; // Move past the character and its count
+        } else {
+            // Match single character
+            if (!matchChar(pattern[patternIndex], input[inputIndex])) {
+                return false; // If it doesn't match, return false
+            }
+            inputIndex++; // Move to the next character in input
+            patternIndex++; // Move to the next character in pattern
         }
-
-        pattern_pos++;
-        input_pos++;
     }
 
-    return pattern_pos == pattern.length();
-    if(!pattern.empty()) {
-        size_t pattern_pos = 0;
-        size_t input_pos = 0;
-
-        while(pattern_pos < pattern.length() && input_pos < input_line.length()) {
-            if(pattern[pattern_pos] == '\\') {
-                if(pattern_pos + 1 < pattern.length()) {
-                    char special_character = pattern[pattern_pos + 1];
-
-                    if(special_character == 'd') {
-                        while(input_pos < input_line.length() && !isdigit(input_line[input_pos])) {
-                            ++input_pos;
-                        }
-
-                        if(input_pos >= input_line.length()) {
-                            return false;
-                        }
-
-                        ++input_pos;
-                    }
-                    else if(special_character == 'w') {
-                        if(!isalnum(input_line[input_pos])) {
-                            return false;
-                        }
-                        ++input_pos;
-                    }
-
-                    pattern_pos += 2;
-                }
-            }
-            else if(isalpha(pattern[pattern_pos])) {
-                if(pattern[pattern_pos] != input_line[input_pos]) {
-                    return false;
-                }
-
-                ++input_pos;
-                ++pattern_pos;
-            }
-        }
-
-        return pattern_pos == pattern.length();;
+    // Ensure we've consumed all characters in the pattern
+    return patternIndex == pattern.size() && inputIndex == input.size();
     }
     else if(pattern.front() =='[' && pattern.back() == ']') {
         bool is_negative_group = (pattern[1] == '^');
