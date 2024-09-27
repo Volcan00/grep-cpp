@@ -103,6 +103,10 @@ bool match_start_anchor(const std::string& input_line, const std::string& patter
     return input_line == pattern;
 }
 
+bool match_end_anchor(const::std::string input_line, const std::string& pattern) {
+    return input_line == pattern;
+}
+
 bool match_pattern(const std::string& input_line, const std::string& pattern) {
     if(pattern.size() == 1) {
         return input_line.find(pattern) != std::string::npos;
@@ -128,6 +132,9 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
     }
     else if(pattern[0] == '^') {
         return match_start_anchor(input_line, pattern.substr(1, pattern.size() - 1));
+    }
+    else if(pattern.back() == '$') {
+        return match_end_anchor(input_line, pattern.substr(0, pattern.size() - 1));
     }
     else if(pattern.length() > 1){
         return match_combined_character_class(input_line, pattern);
@@ -161,10 +168,10 @@ int main(int argc, char* argv[]) {
     
     try {
         if (match_pattern(input_line, pattern)) {
-            // std::cout << "Matched" << '\n';
+            std::cout << "Matched" << '\n';
             return 0;
         } else {
-            // std::cout << "Not matched" << '\n';
+            std::cout << "Not matched" << '\n';
             return 1;
         }
     } catch (const std::runtime_error& e) {
