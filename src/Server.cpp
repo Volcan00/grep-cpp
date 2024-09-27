@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <iostream>
 
 bool match_digit(const std::string& input_line) {
     for(size_t i = 0; i < input_line.size(); ++i) {
@@ -41,45 +42,60 @@ bool match_negative_group(const std::string& input_string, const std::string& pa
     return true;
 }
 
-bool match_with_starting_position(const std::string& input_line, const std::string& pattern, int input_pos, int pattern_pos) {
+bool match_combined_character_class(const std::string& input_line, const std::string& pattern)
+{
+    int pattern_len = pattern.size();
     int input_len = input_line.size();
-    int pat_len = pattern.size();
-    
-    while (input_pos < input_len && pattern_pos < pat_len) {
-        if (pattern[pattern_pos] == '\\') {
-            if (pattern_pos + 1 >= pat_len) return false; // Invalid pattern
-            char nextChar = pattern[pattern_pos + 1];
-            if (nextChar == 'd') {
-                if (!std::isdigit(input_line[input_pos])) return false;
-            } else if (nextChar == 'w') {
-                if (!std::isalnum(input_line[input_pos])) return false;
-            } else {
-                return false; // Unsupported escape sequence
-            }
-            pattern_pos += 2;  // Move past \d or \w
-        } else {
-            // Literal match
-            if (pattern[pattern_pos] != input_line[input_pos]) {
-                return false;
-            }
-            pattern_pos++;
-        }
-        input_pos++;
-    }
-    
-    // If we consumed the entire pattern, we have a match
-    return pattern_pos == input_len;
-}
 
-bool match_combined_character_class(const std::string& input_line, const std::string& pattern) {
-    int input_len = input_line.size();
-    
-    for (int i = 0; i < input_len; ++i) {
-        if (match_with_starting_position(input_line, pattern, i, 0)) {
+    for(int input_index = 0; input_index < input_len; ++input_index) {
+        int input_pos = input_index;
+        int pattern_index = 0;
+
+        while(pattern_index < pattern_len && input_pos < input_len) {
+            char pattern_char = pattern[pattern_index];
+
+            if(pattern_char == '\\') {
+                ++pattern_index;
+
+                if(pattern_index >= pattern_len) {
+                    return false;
+                }
+
+                char escape_char = pattern[pattern_index];
+                if(escape_char == 'd') {
+                    if(!std::isdigit(input_line[input_pos])) {
+                        break;
+                    }
+                    else {
+                        ++input_pos;
+                    }
+                }
+                else if(escape_char == 'w') {
+                    if(!std::isalnum(input_line[input_pos])) {
+                        break;
+                    }
+                    else {
+                        ++input_pos;
+                    }
+                }
+                else {
+                    return false;
+                }
+            }
+            else {
+                if(input_line[input_pos] != pattern_char) {
+                    break;
+                }
+                else {
+                    ++input_pos;
+                }
+            }
+            ++pattern_index;
+        }
+        if(pattern_index == pattern_len) {
             return true;
         }
     }
-    
     return false;
 }
 
@@ -106,7 +122,7 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
 
         return is_negative_group ? match_negative_group(input_line, pattern) : match_positive_group(input_line, pattern);
     }
-    else if(pattern.length() > 2){
+    else if(pattern.length() > 1){
         return match_combined_character_class(input_line, pattern);
     }
     else {
