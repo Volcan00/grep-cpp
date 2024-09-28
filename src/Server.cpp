@@ -89,13 +89,12 @@ bool match_combined_character_class(const std::string& input_line, const std::st
                 }
             }
             else if(pattern_char == '+') {
-                --input_pos;
-
-                if(input_pos < 0) {
+                if(input_pos == 0 || input_line[input_pos - 1] != pattern[pattern_index - 1]) {
                     return false;
                 }
 
-                while(input_line[input_pos] == pattern[pattern_index - 1]) {
+                char repeat_char = pattern[pattern_index - 1];
+                while(input_pos < input_len &&  input_line[input_pos] == repeat_char) {
                     ++input_pos;
                 }
             }
