@@ -51,6 +51,12 @@ bool match_combined_character_class(const std::string& input_line, const std::st
         int input_pos = input_index;
         int pattern_index = 0;
 
+        bool start = false;
+        if(pattern[pattern_index] == '^') {
+            ++pattern_index;
+            start = true;
+        }
+
         while(pattern_index < pattern_len && input_pos < input_len) {
             char pattern_char = pattern[pattern_index];
 
@@ -95,15 +101,14 @@ bool match_combined_character_class(const std::string& input_line, const std::st
         if(pattern_index == pattern_len) {
             return true;
         }
+        if(start && pattern_index != pattern_len) {
+            return false;
+        }
     }
     return false;
 }
 
-bool match_start_anchor(const std::string& input_line, const std::string& pattern) {
-    return input_line == pattern;
-}
-
-bool match_end_anchor(const::std::string input_line, const std::string& pattern) {
+bool match_end_anchor(const std::string& input_line, const std::string& pattern) {
     return input_line == pattern;
 }
 
@@ -130,13 +135,10 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
 
         return is_negative_group ? match_negative_group(input_line, pattern) : match_positive_group(input_line, pattern);
     }
-    else if(pattern[0] == '^') {
-        return match_start_anchor(input_line, pattern.substr(1, pattern.size() - 1));
-    }
     else if(pattern.back() == '$') {
         return match_end_anchor(input_line, pattern.substr(0, pattern.size() - 1));
     }
-    else if(pattern.length() > 1){
+    else if(pattern.length() > 1) {
         return match_combined_character_class(input_line, pattern);
     }
     else {
