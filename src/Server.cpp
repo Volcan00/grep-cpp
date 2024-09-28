@@ -88,6 +88,17 @@ bool match_combined_character_class(const std::string& input_line, const std::st
                     return false;
                 }
             }
+            else if(pattern_char == '+') {
+                --input_pos;
+
+                if(input_pos < 0) {
+                    return false;
+                }
+
+                while(input_line[input_pos] == pattern[pattern_index - 1]) {
+                    ++input_pos;
+                }
+            }
             else {
                 if(input_line[input_pos] != pattern_char) {
                     break;
