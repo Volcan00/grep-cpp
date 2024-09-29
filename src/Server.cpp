@@ -47,7 +47,7 @@ bool match_combined_character_class(const std::string& input_line, const std::st
     int pattern_len = pattern.size();
     int input_len = input_line.size();
 
-    bool optional = pattern.back() == '?' ? true : false;
+    bool optional = (pattern.find('?') != std::string::npos) ? true : false;
 
     for(int input_index = 0; input_index < input_len; ++input_index) {
         int input_pos = input_index;
@@ -106,7 +106,7 @@ bool match_combined_character_class(const std::string& input_line, const std::st
                 }
                 else if (input_line[input_pos] == pattern_char && pattern[pattern_index + 1] == '?') {
                     ++pattern_index;
-                    input_pos;
+                    ++input_pos;
 
                 }
                 else if(input_line[input_pos] != pattern_char) {
