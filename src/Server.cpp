@@ -131,9 +131,6 @@ bool match_combined_character_class(const std::string& input_line, const std::st
     if (optional && pattern[pattern_len - 1] == '?' && pattern_pos == pattern_len - 2) {
         return true;
     }
-    if(optional && (pattern_pos < pattern_len)) {
-        return true;
-    }
 
     return false;
 }
