@@ -47,7 +47,9 @@ bool match_combined_character_class(const std::string& input_line, const std::st
     int pattern_len = pattern.size();
     int input_len = input_line.size();
 
-    bool optional = (pattern.find('?') != std::string::npos) ? true : false;
+    bool optional = pattern.find('?') != std::string::npos;
+
+    int pattern_pos = 0;
 
     for(int input_index = 0; input_index < input_len; ++input_index) {
         int input_pos = input_index;
@@ -100,16 +102,16 @@ bool match_combined_character_class(const std::string& input_line, const std::st
                     ++input_pos;
                 }
             }
-            else {
-                if(input_line[input_pos] != pattern_char && pattern[pattern_index + 1] == '?') {
-                    ++pattern_index;
-                }
-                else if (input_line[input_pos] == pattern_char && pattern[pattern_index + 1] == '?') {
+            else if (pattern_index + 1 < pattern_len && pattern[pattern_index + 1] == '?') {
+                if (input_line[input_pos] == pattern_char) {
                     ++pattern_index;
                     ++input_pos;
-
+                } else {
+                    ++pattern_index;
                 }
-                else if(input_line[input_pos] != pattern_char) {
+            }
+            else {
+                if(input_line[input_pos] != pattern_char) {
                     break;
                 }
                 else {
@@ -117,6 +119,7 @@ bool match_combined_character_class(const std::string& input_line, const std::st
                 }
             }
             ++pattern_index;
+            pattern_pos = pattern_index;
         }
         if(pattern_index == pattern_len) {
             return true;
@@ -125,7 +128,10 @@ bool match_combined_character_class(const std::string& input_line, const std::st
             return false;
         }
     }
-    if(optional && ((pattern_len - input_len) % 2 == 0)) {
+    if (optional && pattern[pattern_len - 1] == '?' && pattern_pos == pattern_len - 2) {
+        return true;
+    }
+    if(optional && (pattern_pos < pattern_len)) {
         return true;
     }
 
