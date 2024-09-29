@@ -169,6 +169,12 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
 
         return is_negative_group ? match_negative_group(input_line, pattern) : match_positive_group(input_line, pattern);
     }
+    else if(pattern.front() == '(' && pattern.back() == ')') {
+        std::string sub_pattern_1 = pattern.substr(1, pattern.find('|') - 1);
+        std::string sub_pattern_2 = pattern.substr(pattern.find('|') + 1, pattern.size() - pattern.find('|') - 2);
+
+        return (match_combined_character_class(input_line, sub_pattern_1) || match_combined_character_class(input_line, sub_pattern_2));
+    }
     else if(pattern.back() == '$') {
         return match_end_anchor(input_line, pattern.substr(0, pattern.size() - 1));
     }
