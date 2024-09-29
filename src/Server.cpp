@@ -42,8 +42,7 @@ bool match_negative_group(const std::string& input_string, const std::string& pa
     return true;
 }
 
-bool match_combined_character_class(const std::string& input_line, const std::string& pattern)
-{
+bool match_combined_character_class(const std::string& input_line, const std::string& pattern) {
     int pattern_len = pattern.size();
     int input_len = input_line.size();
 
@@ -67,7 +66,7 @@ bool match_combined_character_class(const std::string& input_line, const std::st
             if(pattern_char == '\\') {
                 ++pattern_index;
 
-                if(pattern_index >= pattern_len) {
+                if(pattern_index >= pattern_len){
                     return false;
                 }
 
@@ -108,6 +107,14 @@ bool match_combined_character_class(const std::string& input_line, const std::st
                     ++input_pos;
                 } else {
                     ++pattern_index;
+                }
+            }
+            else if(pattern_char == '.') {
+                if(!isalpha(input_line[input_pos])) {
+                    break;
+                }
+                else {
+                    ++input_pos;
                 }
             }
             else {
