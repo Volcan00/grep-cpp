@@ -135,20 +135,22 @@ bool match_combined_character_class(const std::string& input_line, const std::st
 
         bool startAnchor = false;
         bool endAnchor = false;
-        if(pattern[pattern_index] == '^') {
-            ++pattern_index;
-            startAnchor = true;
-        }
-
-        if(pattern[pattern_index] == '$') {
-            ++pattern_index;
-            endAnchor = true;
-        }
 
         while(pattern_index < pattern_len && input_pos < input_len) {
             char pattern_char = pattern[pattern_index];
             bool is_escape = false;
 
+            if(pattern_char == '^') {
+            ++pattern_index;
+            startAnchor = true;
+            continue;
+            }
+
+            else if(pattern[pattern_index] == '$') {
+                ++pattern_index;
+                endAnchor = true;
+                continue;
+            }
             if(pattern_char == '\\') {
                 ++pattern_index;
 
