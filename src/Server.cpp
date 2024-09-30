@@ -66,16 +66,32 @@ bool handle_escape_sequence(const std::string& input_line, char escape_char, int
     return false;
 }
 
-bool handle_repetition(const std::string& input_line, int input_len, char repeat_char, int& input_pos) {
-    if(input_pos == 0 || input_line[input_pos - 1] != repeat_char) {
-        return false;
+bool handle_repetition(const std::string& input_line, int input_len, char repeat_char, int& input_pos, bool is_escape) {
+    if (is_escape) {
+        // Handle escape sequences: \d+ or \w+
+        if (repeat_char == 'd') {
+            while (input_pos < input_len && std::isdigit(input_line[input_pos])) {
+                ++input_pos;
+            }
+        } else if (repeat_char == 'w') {
+            while (input_pos < input_len && std::isalnum(input_line[input_pos])) {
+                ++input_pos;
+            }
+        } else {
+            return false;
+        }
+    } else {
+        char prev_char = input_line[input_pos - 1];
+        if (prev_char != repeat_char) {
+            return false;
+        }
+
+        while (input_pos < input_len && input_line[input_pos] == repeat_char) {
+            ++input_pos;
+        }
     }
 
-    while(input_pos < input_len &&  input_line[input_pos] == repeat_char) {
-        ++input_pos;
-    }
-
-    return true; 
+    return true;
 }
 
 void handle_optional(const std::string& input_line, char pattern_char, int& pattern_index, int& input_pos) {
@@ -100,10 +116,8 @@ bool handle_wildcard(const std::string& input_line, int& input_pos) {
 bool match_combined_character_class(const std::string& input_line, const std::string& pattern) {
     int pattern_len = pattern.size();
     int input_len = input_line.size();
-
-    bool optional = pattern.find('?') != std::string::npos;
-
     int pattern_pos = 0;
+    bool optional = pattern.find('?') != std::string::npos;
 
     for(int input_index = 0; input_index < input_len; ++input_index) {
         int input_pos = input_index;
@@ -117,6 +131,7 @@ bool match_combined_character_class(const std::string& input_line, const std::st
 
         while(pattern_index < pattern_len && input_pos < input_len) {
             char pattern_char = pattern[pattern_index];
+            bool is_escape = false;
 
             if(pattern_char == '\\') {
                 ++pattern_index;
@@ -126,12 +141,22 @@ bool match_combined_character_class(const std::string& input_line, const std::st
                 }
 
                 char escape_char = pattern[pattern_index];
+                is_escape = true;
                 if(!handle_escape_sequence(input_line, escape_char, input_pos)) {
                     break;
                 }
+                
+                if(pattern_pos + 1 < pattern_len && pattern[pattern_index + 1] == '+') {
+                    if(!handle_repetition(input_line, input_len, pattern[pattern_index], input_pos, is_escape)) {
+                        return false;
+                    }
+
+                    pattern_index += 2;
+                    continue;
+                }
             }
             else if(pattern_char == '+') {
-                if(!handle_repetition(input_line, input_len, pattern[pattern_index - 1], input_pos)) {
+                if(!handle_repetition(input_line, input_len, pattern[pattern_index - 1], input_pos, is_escape)) {
                     return false;
                 }
             }
@@ -162,6 +187,10 @@ bool match_combined_character_class(const std::string& input_line, const std::st
         if(start && pattern_index != pattern_len) {
             return false;
         }
+    }
+
+    if(pattern[pattern_len - 1] == '+' && pattern_pos == pattern_len - 1) {
+        return true;
     }
 
     if (optional && pattern[pattern_len - 1] == '?' && pattern_pos == pattern_len - 2) {
