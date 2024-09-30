@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-#include <iostream>
 
 bool match_digit(const std::string& input_line) {
     for(size_t i = 0; i < input_line.size(); ++i) {
@@ -42,6 +41,62 @@ bool match_negative_group(const std::string& input_string, const std::string& pa
     return true;
 }
 
+bool match_end_anchor(const std::string& input_line, const std::string& pattern) {
+    return input_line == pattern;
+}
+
+bool handle_escape_sequence(const std::string& input_line, char escape_char, int& input_pos) {
+    switch (escape_char)
+    {
+        case 'd':
+            if(std::isdigit(input_line[input_pos])) {
+                ++input_pos;
+                return true;
+            }
+            break;
+        case 'w':
+            if(std::isalnum(input_line[input_pos])) {
+                ++input_pos;
+                return true;
+            }
+            break;
+        default:
+            return false;
+    }
+    return false;
+}
+
+bool handle_repetition(const std::string& input_line, int input_len, char repeat_char, int& input_pos) {
+    if(input_pos == 0 || input_line[input_pos - 1] != repeat_char) {
+        return false;
+    }
+
+    while(input_pos < input_len &&  input_line[input_pos] == repeat_char) {
+        ++input_pos;
+    }
+
+    return true; 
+}
+
+void handle_optional(const std::string& input_line, char pattern_char, int& pattern_index, int& input_pos) {
+    if (input_line[input_pos] == pattern_char) {
+        ++input_pos;
+    }
+    
+    ++pattern_index;
+}
+
+bool handle_wildcard(const std::string& input_line, int& input_pos) {
+    if(std::isalpha(input_line[input_pos])) {
+        ++input_pos;
+        return true;
+    }
+
+    ++input_pos;
+
+    return false;
+}
+
 bool match_combined_character_class(const std::string& input_line, const std::string& pattern) {
     int pattern_len = pattern.size();
     int input_len = input_line.size();
@@ -71,79 +126,49 @@ bool match_combined_character_class(const std::string& input_line, const std::st
                 }
 
                 char escape_char = pattern[pattern_index];
-                if(escape_char == 'd') {
-                    if(!std::isdigit(input_line[input_pos])) {
-                        break;
-                    }
-                    else {
-                        ++input_pos;
-                    }
-                }
-                else if(escape_char == 'w') {
-                    if(!std::isalnum(input_line[input_pos])) {
-                        break;
-                    }
-                    else {
-                        ++input_pos;
-                    }
-                }
-                else {
-                    return false;
+                if(!handle_escape_sequence(input_line, escape_char, input_pos)) {
+                    break;
                 }
             }
             else if(pattern_char == '+') {
-                if(input_pos == 0 || input_line[input_pos - 1] != pattern[pattern_index - 1]) {
+                if(!handle_repetition(input_line, input_len, pattern[pattern_index - 1], input_pos)) {
                     return false;
-                }
-
-                char repeat_char = pattern[pattern_index - 1];
-                while(input_pos < input_len &&  input_line[input_pos] == repeat_char) {
-                    ++input_pos;
                 }
             }
             else if (pattern_index + 1 < pattern_len && pattern[pattern_index + 1] == '?') {
-                if (input_line[input_pos] == pattern_char) {
-                    ++pattern_index;
-                    ++input_pos;
-                } else {
-                    ++pattern_index;
-                }
+                handle_optional(input_line, pattern_char, pattern_index, input_pos);
             }
             else if(pattern_char == '.') {
-                if(!isalpha(input_line[input_pos])) {
+                if(!handle_wildcard(input_line, input_pos)) {
                     break;
-                }
-                else {
-                    ++input_pos;
                 }
             }
             else {
                 if(input_line[input_pos] != pattern_char) {
                     break;
                 }
-                else {
-                    ++input_pos;
-                }
+                
+                ++input_pos;
             }
+
             ++pattern_index;
             pattern_pos = pattern_index;
         }
+
         if(pattern_index == pattern_len) {
             return true;
         }
+
         if(start && pattern_index != pattern_len) {
             return false;
         }
     }
+
     if (optional && pattern[pattern_len - 1] == '?' && pattern_pos == pattern_len - 2) {
         return true;
     }
 
     return false;
-}
-
-bool match_end_anchor(const std::string& input_line, const std::string& pattern) {
-    return input_line == pattern;
 }
 
 bool match_pattern(const std::string& input_line, const std::string& pattern) {
