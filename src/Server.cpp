@@ -267,40 +267,38 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
             break;
         }
     }
-    else if(pattern.find('|') != std::string::npos && pattern.find('(') != std::string::npos && pattern.find(')') != std::string::npos) {
-        int openParenPos = pattern.find('(');
-        int pipePos = pattern.find('|');
-        int closeParenPos = pattern.find(')');
-
-        std::string sub_pattern_1 = pattern.substr(0, openParenPos) + pattern.substr(openParenPos + 1, pipePos - openParenPos - 1) + pattern.substr(closeParenPos + 1);
-        std::string sub_pattern_2 = pattern.substr(0, openParenPos) + pattern.substr(pipePos + 1, closeParenPos - pipePos - 1) + pattern.substr(closeParenPos + 1); 
-
-        return (match_pattern(input_line, sub_pattern_1) || match_pattern(input_line, sub_pattern_2));
-    }
     else if(pattern.find('(') != std::string::npos && pattern.find(')') != std::string::npos) {
         int openParenPos = pattern.find('(');
         int closeParenPos = pattern.find(')');
 
-        std::string new_pattern = "";
-        std::string capturedGroup = pattern.substr(openParenPos + 1, closeParenPos - openParenPos - 1);
+        if(pattern.find('|') != std::string::npos) {
+            int pipePos = pattern.find('|');
 
-        for(size_t i = 0; i < pattern.size(); ++i) {
-            if(pattern[i] == '(' || pattern[i] == ')') {
-                continue;
-            }
+            std::string sub_pattern_1 = pattern.substr(0, openParenPos + 1) + pattern.substr(openParenPos + 1, pipePos - openParenPos - 1) + ")" + pattern.substr(closeParenPos + 1);
+            std::string sub_pattern_2 = pattern.substr(0, openParenPos + 1) + pattern.substr(pipePos + 1, closeParenPos - pipePos) + pattern.substr(closeParenPos + 1);
 
-            if(std::isdigit(pattern[i]) && i > 0 && pattern[i - 1] == '\\') {
-                new_pattern.pop_back();
-                new_pattern += capturedGroup;
-            }
-            else {
-                new_pattern += pattern[i];
-            }
+            return (match_pattern(input_line, sub_pattern_1) || match_pattern(input_line, sub_pattern_2));
         }
+        else {
+            std::string new_pattern = "";
+            std::string capturedGroup = pattern.substr(openParenPos + 1, closeParenPos - openParenPos - 1);
 
-        std::cout << new_pattern << '\n';
+            for(size_t i = 0; i < pattern.size(); ++i) {
+                if(pattern[i] == '(' || pattern[i] == ')') {
+                    continue;
+                }
 
-        return match_pattern(input_line, new_pattern);
+                if(std::isdigit(pattern[i]) && i > 0 && pattern[i - 1] == '\\') {
+                    new_pattern.pop_back();
+                    new_pattern += capturedGroup;
+                }
+                else {
+                    new_pattern += pattern[i];
+                }
+            }
+
+            return match_pattern(input_line, new_pattern);
+        }
     }
     else if(pattern.length() > 1) {
         return match_combined_character_class(input_line, pattern);
