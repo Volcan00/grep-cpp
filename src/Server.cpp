@@ -140,8 +140,9 @@ bool match_combined_character_class(const std::string& input_line, const std::st
             startAnchor = true;
         }
 
-        if(pattern.back() == '$') {
+        if(pattern[pattern_index] == '$') {
             endAnchor = true;
+            break;
         }
 
         while(pattern_index < pattern_len && input_pos < input_len) {
