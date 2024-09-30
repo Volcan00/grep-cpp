@@ -1,12 +1,13 @@
 #include <iostream>
 #include <string>
+#include <unordered_set>
+#include <vector>
 
 bool match_digit(const std::string& input_line) {
     for(size_t i = 0; i < input_line.size(); ++i) {
         if(isdigit(input_line[i]))
             return true;
     }
-
     return false;
 }
 
@@ -19,27 +20,37 @@ bool match_alphanumeric(const std::string input_line) {
     return false;
 }
 
-bool match_positive_group(const std::string& input_line, const std::string& pattern) {
-    std::string char_group = pattern.substr(1, pattern.size() - 2);
-
-    for(char c : char_group) {
-        if(input_line.find(c) != std::string::npos)
-            return true;
+bool match_positive_group(const std::string& input_line, const std::string& pattern, int start, int end, int& input_pos) {
+    bool matched = false;
+    while (input_pos < input_line.size()) {
+        bool found = false;
+        for (int idx = start + 1; idx < end; ++idx) {
+            if (input_line[input_pos] == pattern[idx]) {
+                ++input_pos;
+                found = true;
+                matched = true;
+                break;
+            }
+        }
+        if (!found) break;
     }
+    return matched;
+}
 
+bool match_negative_group(const std::string& input_line, const std::string& pattern, int start, int end, int& input_pos) {
+    if (input_pos < input_line.size()) {
+        char input_char = input_line[input_pos];
+        for (int idx = start + 1; idx < end; ++idx) {
+            if (input_char == pattern[idx]) {
+                return false;
+            }
+        }
+        ++input_pos;
+        return true;
+    }
     return false;
 }
 
-bool match_negative_group(const std::string& input_string, const std::string& pattern) {
-    std::string char_group = pattern.substr(2, pattern.size() - 3);
-
-    for(char c : char_group) {
-        if(input_string.find(c) != std::string::npos)
-            return false;
-    }
-
-    return true;
-}
 
 bool match_end_anchor(const std::string& input_line, const std::string& pattern) {
     return input_line == pattern;
@@ -68,7 +79,6 @@ bool handle_escape_sequence(const std::string& input_line, char escape_char, int
 
 bool handle_repetition(const std::string& input_line, int input_len, char repeat_char, int& input_pos, bool is_escape) {
     if (is_escape) {
-        // Handle escape sequences: \d+ or \w+
         if (repeat_char == 'd') {
             while (input_pos < input_len && std::isdigit(input_line[input_pos])) {
                 ++input_pos;
@@ -155,6 +165,35 @@ bool match_combined_character_class(const std::string& input_line, const std::st
                     continue;
                 }
             }
+            else if (pattern_char == '[') {
+                int begin = pattern_index;
+                while (pattern_index < pattern_len && pattern[pattern_index] != ']') {
+                    ++pattern_index;
+                }
+
+                if (pattern_index >= pattern_len) {
+                    return false;
+                }
+
+                bool is_negative = (pattern[begin + 1] == '^');
+                bool matched = false;
+
+                if (is_negative) {
+                    matched = match_negative_group(input_line, pattern, begin, pattern_index, input_pos);
+                } else {
+                    matched = match_positive_group(input_line, pattern, begin, pattern_index, input_pos);
+                }
+
+                if (!matched) {
+                    break;
+                }
+
+                if (pattern_index + 1 < pattern_len && pattern[pattern_index + 1] == '+') {
+                    if (!matched) return false; 
+                    ++pattern_index;
+                }
+
+            }
             else if(pattern_char == '+') {
                 if(!handle_repetition(input_line, input_len, pattern[pattern_index - 1], input_pos, is_escape)) {
                     return false;
@@ -218,11 +257,11 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
             break;
         }
     }
-    else if(pattern.front() =='[' && pattern.back() == ']') {
-        bool is_negative_group = (pattern[1] == '^');
+    // else if(pattern.front() =='[' && pattern.back() == ']') {
+    //     bool is_negative_group = (pattern[1] == '^');
 
-        return is_negative_group ? match_negative_group(input_line, pattern) : match_positive_group(input_line, pattern);
-    }
+    //     return is_negative_group ? match_negative_group(input_line, pattern) : match_positive_group(input_line, pattern);
+    // }
     else if(pattern.find('|') != std::string::npos && pattern.find('(') != std::string::npos && pattern.find(')') != std::string::npos) {
         int openParenPos = pattern.find('(');
         int pipePos = pattern.find('|');
@@ -253,6 +292,8 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
                 new_pattern += pattern[i];
             }
         }
+
+        std::cout << new_pattern << '\n';
 
         return match_pattern(input_line, new_pattern);
     }
