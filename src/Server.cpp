@@ -133,10 +133,15 @@ bool match_combined_character_class(const std::string& input_line, const std::st
         int input_pos = input_index;
         int pattern_index = 0;
 
-        bool start = false;
+        bool startAnchor = false;
+        bool endAnchor = false;
         if(pattern[pattern_index] == '^') {
             ++pattern_index;
-            start = true;
+            startAnchor = true;
+        }
+
+        if(pattern.back() == '$') {
+            endAnchor = true;
         }
 
         while(pattern_index < pattern_len && input_pos < input_len) {
@@ -223,7 +228,7 @@ bool match_combined_character_class(const std::string& input_line, const std::st
             return true;
         }
 
-        if(start && pattern_index != pattern_len) {
+        if(startAnchor && endAnchor && pattern_index != pattern_len) {
             return false;
         }
     }
@@ -257,11 +262,6 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
             break;
         }
     }
-    // else if(pattern.front() =='[' && pattern.back() == ']') {
-    //     bool is_negative_group = (pattern[1] == '^');
-
-    //     return is_negative_group ? match_negative_group(input_line, pattern) : match_positive_group(input_line, pattern);
-    // }
     else if(pattern.find('|') != std::string::npos && pattern.find('(') != std::string::npos && pattern.find(')') != std::string::npos) {
         int openParenPos = pattern.find('(');
         int pipePos = pattern.find('|');
@@ -296,9 +296,6 @@ bool match_pattern(const std::string& input_line, const std::string& pattern) {
         std::cout << new_pattern << '\n';
 
         return match_pattern(input_line, new_pattern);
-    }
-    else if(pattern.back() == '$') {
-        return match_end_anchor(input_line, pattern.substr(0, pattern.size() - 1));
     }
     else if(pattern.length() > 1) {
         return match_combined_character_class(input_line, pattern);
