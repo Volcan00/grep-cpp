@@ -128,13 +128,17 @@ bool match_combined_character_class(const std::string& input_line, const std::st
     int input_len = input_line.size();
     int pattern_pos = 0;
     bool optional = pattern.find('?') != std::string::npos;
+    bool endAnchor = (pattern_len > 0 && pattern[pattern_len - 1] == '$');
+
+    if(endAnchor) {
+        --pattern_len;
+    }
 
     for(int input_index = 0; input_index < input_len; ++input_index) {
         int input_pos = input_index;
         int pattern_index = 0;
 
         bool startAnchor = false;
-        bool endAnchor = false;
 
         while(pattern_index < pattern_len && input_pos < input_len) {
             char pattern_char = pattern[pattern_index];
@@ -145,13 +149,7 @@ bool match_combined_character_class(const std::string& input_line, const std::st
             startAnchor = true;
             continue;
             }
-
-            else if(pattern[pattern_index] == '$') {
-                ++pattern_index;
-                endAnchor = true;
-                continue;
-            }
-            if(pattern_char == '\\') {
+            else if(pattern_char == '\\') {
                 ++pattern_index;
 
                 if(pattern_index >= pattern_len){
@@ -228,10 +226,14 @@ bool match_combined_character_class(const std::string& input_line, const std::st
         }
 
         if(pattern_index == pattern_len) {
+            if(endAnchor) {
+                return input_pos == input_len;
+            }
+
             return true;
         }
 
-        if(startAnchor && endAnchor && pattern_index != pattern_len) {
+        if(startAnchor && pattern_index != pattern_len) {
             return false;
         }
     }
